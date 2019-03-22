@@ -156,5 +156,48 @@ def insertHours():
     #outfile.close()  #uncomment this line if you are writing the INSERT statements to an output file.
     f.close()
 
+def insertFriends():
+    with open('C:/users/sinou/Desktop/yelp_user.json', 'r') as f:
+        line = f.readline()
+        count_line = 0
 
-insert2BusinessTable()
+        try:
+           # conn = pscyopg2.connect("dbname='milestone2' user='postgres' host='localhost' password='Sweety12'")
+            conn = psycopg2.connect("dbname='milestone2' user='postgres' host='localhost' password='Sweety12'")
+
+        except:
+            print("Error: cannot connect to database")
+        cur = conn.cursor()
+
+        while line:
+            data = json.loads(line)
+
+            friends = data['friends']
+
+            for friend in friends:
+                sql_str = "INSERT INTO friends(user_id, friend_id) " + \
+                    "VALUES ('" + cleanStr4SQL(data['user_id']) + "','" + friend + "') " + \
+                    "ON CONFLICT(friend_id) DO NOTHING;" 
+
+            try:
+                cur.execute(sql_str)
+            except psycopg2.Error as e: 
+                print("Insert to user table failed...")
+                print("Error: ", e)
+            conn.commit()
+            # optionally you might write the INSERT statement to a file.
+            # outfile.write(sql_str)
+
+            line = f.readline()
+            count_line +=1
+
+        cur.close()
+        conn.close()
+
+    print(count_line)
+    #outfile.close()  #uncomment this line if you are writing the INSERT statements to an output file.
+    f.close()
+
+
+#
+# insert2BusinessTable()
