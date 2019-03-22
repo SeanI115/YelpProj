@@ -44,4 +44,39 @@ def insert2BusinessTable():
     #outfile.close()  #uncomment this line if you are writing the INSERT statements to an output file.
     f.close()
 
+def insertUser():
+    with open('C:/users/sinou/Desktop/yelp_user.JSON', 'r') as f:
+        line = f.readline()
+        count_line = 0
+
+        try:
+            conn = psycopg2.connect("dbname='milestone2' user='postgres' host='localhost' password='pass'")
+        except:
+            print('Cant connect to db!')
+        
+        cur = conn.cursor()
+
+        while line:
+            data = json.loads(line)
+            sql_str = "INSERT INTO acc (average_stars, fans, cool, funny, name, review_count, useful, yelping_since, user_id) " \
+                "VALUES ('" + str(data['average_stars']) + "','" + str(data["fans"]) + "','" + str(data["cool"]) + "','" \
+                + str(data["funny"]) + "','" + cleanStr4SQL(data["name"]) + "','" + str(data["review_count"]) + "','" + str(data["useful"]) \
+                + "','" + cleanStr4SQL(data["yelping_since"])  + "','" + str(data["user_id"]) + "') " \
+                + "ON CONFLICT (user_id) DO NOTHING;"
+            try:
+                cur.execute(sql_str)
+            except psycopg2.Error as e: 
+                print("Insert to user table failed...")
+                print("Error: ", e)
+            conn.commit()
+
+            line = f.readline()
+            count_line += 1
+
+        cur.close()
+        conn.close()
+    print(count_line)
+    f.close()
+
+
 insert2BusinessTable()
