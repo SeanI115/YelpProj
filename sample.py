@@ -43,3 +43,5 @@ def insert2BusinessTable():
     print(count_line)
     #outfile.close()  #uncomment this line if you are writing the INSERT statements to an output file.
     f.close()
+
+insert2BusinessTable()
