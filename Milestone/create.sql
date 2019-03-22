@@ -1,16 +1,16 @@
 CREATE TABLE business (
     business_id VARCHAR(25) NOT NULL,
-    name VARCHAR(70),
+    name VARCHAR(100),
     state VARCHAR(2),
     city VARCHAR(40),
     zipcode INT,
     latitude FLOAT,
     longitude FLOAT,
-    address VARCHAR(70),
+    address VARCHAR(100),
     review_count INT,
     num_checkins INT,
     reviewRating FLOAT,
-    is_open INT,
+    is_open BOOLEAN,
     stars FLOAT,
     PRIMARY KEY(business_id)
 );
