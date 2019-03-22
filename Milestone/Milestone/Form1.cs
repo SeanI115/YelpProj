@@ -159,7 +159,27 @@ namespace Milestone
                     }
                 }
                 conn.Close();
+
+                conn.Open();
+                using (var cmd = new NpgsqlCommand())
+                {
+                    cmd.Connection = conn;
+                    cmd.CommandText = "SELECT distinct category_name FROM categories WHERE business_id IN (SELECT business_id FROM business WHERE zipcode= '" + comboBox3.SelectedItem.ToString() + "') ORDER BY category_name;";
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            comboBox4.Items.Add(reader.GetString(0));
+                        }
+                    }
+                }
+
             }
+        }
+
+        private void comboBox4_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            textBox1.AppendText(comboBox4.SelectedItem.ToString() + Environment.NewLine);
         }
     }
 }
