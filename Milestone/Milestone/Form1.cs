@@ -25,13 +25,14 @@ namespace Milestone
         {
             InitializeComponent();
             changeState();
+    
         }
 
-        string connstring = "Server=localhost;Port=5432;User Id = postgres; Password=eraser2;Database=postgres";
+        string connstring = "Server=localhost; Username= postgres; Password=Sweety12; Database=milestone2";
 
         private void Form1Load(object sender, EventArgs e)
         {
-            
+
         }
 
         private void changeState()
@@ -42,7 +43,7 @@ namespace Milestone
                 using (var cmd = new NpgsqlCommand())
                 {
                     cmd.Connection = conn;
-                    cmd.CommandText = "SELECT distinct companystate FROM companies ORDER BY companystate;";
+                    cmd.CommandText = "SELECT distinct state FROM business ORDER BY state;";
                     using (var reader = cmd.ExecuteReader())
                     {
                         while (reader.Read())
@@ -63,7 +64,7 @@ namespace Milestone
                 using (var cmd = new NpgsqlCommand())
                 {
                     cmd.Connection = conn;
-                    cmd.CommandText = "SELECT distinct companycity FROM companies ORDER BY companycity;";
+                    cmd.CommandText = "SELECT distinct city FROM business ORDER BY city;";
                     using (var reader = cmd.ExecuteReader())
                     {
                         while (reader.Read())
@@ -87,7 +88,7 @@ namespace Milestone
                 using (var cmd = new NpgsqlCommand())
                 {
                     cmd.Connection = conn;
-                    cmd.CommandText = "SELECT distinct companycity FROM companies WHERE companystate = '" + comboBox1.SelectedItem.ToString() + "' ORDER by companycity;";
+                    cmd.CommandText = "SELECT distinct city FROM business WHERE state = '" + comboBox1.SelectedItem.ToString().ToUpper() + "' ORDER by city;";
                     using (var reader = cmd.ExecuteReader())
                     {
                         while (reader.Read())
@@ -97,6 +98,7 @@ namespace Milestone
 
                     }
                 }
+                conn.Close();
             }
         }
 
@@ -108,18 +110,76 @@ namespace Milestone
                 using (var cmd = new NpgsqlCommand())
                 {
                     cmd.Connection = conn;
-                    cmd.CommandText = "SELECT companyname, companystate, companycity FROM companies WHERE companycity = '"+ comboBox2.SelectedItem.ToString() + "' AND companystate = '" + comboBox1.SelectedItem.ToString() + "'ORDER BY companyname;";
+                    cmd.CommandText = "SELECT distinct zipcode FROM business WHERE city = '" + comboBox2.SelectedItem.ToString() + "' ORDER BY zipcode;";
+                    //cmd.CommandText = "SELECT name, state, city FROM business WHERE city = '"+ comboBox2.SelectedItem.ToString() + "' AND state = '" + comboBox1.SelectedItem.ToString() + "'ORDER BY name;";
                     using (var reader = cmd.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            this.dataGridView1.Rows.Add(reader.GetString(0), reader.GetString(1), reader.GetString(2));
+                            comboBox3.Items.Add(reader.GetString(0));
+                            //this.dataGridView1.Rows.Add(reader.GetString(0), reader.GetString(1), reader.GetString(2));
                         }
 
                     }
                 }
+                conn.Close();
             }
-            comboBox2.Items.Clear();
+            //comboBox2.Items.Clear();
+            
+        }
+
+        private void comboBox3_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            using (var conn = new NpgsqlConnection(connstring))
+            {
+                conn.Open();
+                using (var cmd = new NpgsqlCommand())
+                {
+                    cmd.Connection = conn;
+                    cmd.CommandText = "SELECT business_id, name, state, city, address, zipcode, review_count, num_checkins, is_open, stars FROM business WHERE zipcode = '" + comboBox3.SelectedItem.ToString() + "' AND city= '" + comboBox2.SelectedItem.ToString() + "' ORDER BY zipcode; ";
+
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        int i = 0;
+                        while(reader.Read())
+                        {
+                            dataGridView1.Rows.Add();
+                            dataGridView1.Rows[i].Cells[0].Value = reader.GetString(0);
+                            dataGridView1.Rows[i].Cells[1].Value = reader.GetString(1);
+                            dataGridView1.Rows[i].Cells[2].Value = reader.GetString(2);
+                            dataGridView1.Rows[i].Cells[3].Value = reader.GetString(3);
+                            dataGridView1.Rows[i].Cells[4].Value = reader.GetString(4);
+                            dataGridView1.Rows[i].Cells[5].Value = reader.GetInt32(5);
+                            dataGridView1.Rows[i].Cells[6].Value = reader.GetInt32(6);
+                            dataGridView1.Rows[i].Cells[7].Value = reader.GetInt32(7);
+                            dataGridView1.Rows[i].Cells[8].Value = reader.GetBoolean(8);
+                            dataGridView1.Rows[i].Cells[9].Value = reader.GetDouble(9);
+                            i++;
+                        }
+                    }
+                }
+                conn.Close();
+
+                conn.Open();
+                using (var cmd = new NpgsqlCommand())
+                {
+                    cmd.Connection = conn;
+                    cmd.CommandText = "SELECT distinct category_name FROM categories WHERE business_id IN (SELECT business_id FROM business WHERE zipcode= '" + comboBox3.SelectedItem.ToString() + "') ORDER BY category_name;";
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            comboBox4.Items.Add(reader.GetString(0));
+                        }
+                    }
+                }
+
+            }
+        }
+
+        private void comboBox4_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            textBox1.AppendText(comboBox4.SelectedItem.ToString() + Environment.NewLine);
         }
     }
 }
