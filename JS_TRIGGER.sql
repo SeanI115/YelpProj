@@ -1,35 +1,78 @@
-CREATE TRIGGER ReviewCountIncrement
-	AFTER INSERT ON reviews
-	FOR EACH ROW 
-		SET num_revs = num_revs + 1;
-		
-CREATE TRIGGER ReviewCountDecrement
-	AFTER DELETE ON reviews
+CREATE FUNCTION check_inc()
+	RETURNS TRIGGER AS $inccheck$
+BEGIN
+	UPDATE business
+	SET num_checkins = num_checkins + 1
+	WHERE business_id = NEW.business_id;
+	RETURN NEW;
+END;
+$inccheck$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER CheckinInc AFTER INSERT 
+ON checkins
 	FOR EACH ROW
-		SET num_revs = num_revs - 1;
-		
-CREATE TRIGGER UpdateReviewRating
-	AFTER INSERT ON reviews
-		SET avg_rev = 
-			SUM(SELECT stars FROM reviews WHERE reviews.busines_id = business_id) /
-			COUNT (SELECT * FROM reviews WHERE reviews.business_id = business_id);		
-			
-UPDATE review
-		SET num_revs = COUNT (SELECT review_id FROM reviews WHERE reviews.business_id = business_id);
-		
-UPDATE review
-		SET avg_rev = 
-			SUM(SELECT stars FROM reviews WHERE reviews.business_id = business_id) /
-			COUNT (SELECT * FROM reviews WHERE reviews.business_id = business_id);		
-			
-CREATE TRIGGER CheckinCountIncrement
-	AFTER INSERT ON checkins
-	FOR EACH ROW 
-		SET checkins.count = checkins.count + 1;
-		
-CREATE TRIGGER CheckinCountDecrement
-	AFTER DELETE ON reviews
+	EXECUTE PROCEDURE check_inc();
+
+CREATE FUNCTION check_dec()
+	RETURNS TRIGGER AS $deccheck$
+BEGIN
+	UPDATE business
+	SET num_checkins = num_checkins - 1
+	WHERE business_id = NEW.business_id;
+	RETURN NEW;
+END;
+$deccheck$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER CheckinDec AFTER DELETE 
+ON checkins
 	FOR EACH ROW
-		SET checkins.count = checkins.count - 1;
-		
+	EXECUTE PROCEDURE check_dec();
+
+CREATE FUNCTION rev_inc()
+	RETURNS TRIGGER AS $increv$
+	BEGIN
+		UPDATE business
+		SET review_count = review_count + 1
+		WHERE business_id = NEW.business_id;
+		RETURN NEW;
+	END;
+	$increv$ LANGUAGE plpgsql;
+
+CREATE TRIGGER revInc AFTER INSERT
+	ON review
+	FOR EACH ROW
+	EXECUTE PROCEDURE checkin_dec();
+
+CREATE FUNCTION rev_dec()
+	RETURNS TRIGGER AS $decrev$
+	BEGIN
+		UPDATE business
+		SET review_count = review_count - 1
+		WHERE business_id = NEW.business_id;
+		RETURN NEW;
+	END;
+	$decrev$ LANGUAGE plpgsql;
+
+CREATE TRIGGER revDec AFTER DELETE
+	ON review
+	FOR EACH ROW
+	EXECUTE PROCEDURE rev_dec();
+
+CREATE FUNCTION revAvg()
+	RETURNS TRIGGER AS $avg$
+	BEGIN
+		UPDATE business
+		SET reviewRating = (SELECT AVG(stars) FROM review
+						   	WHERE review.business_id = business.business_id)
+		WHERE business_id = NEW.business_id;
+		RETURN NEW;
+	END;
+	$avg$ LANGUAGE plpgsql;
+
+CREATE TRIGGER avgUpd
+	AFTER INSERT ON review
+	FOR EACH ROW
+	EXECUTE PROCEDURE revAvg();
 	

@@ -61,10 +61,10 @@ CREATE TABLE acc (
     cool INT,
     fans INT,
     funny INT,
-    name VARCHAR(25),
+    name VARCHAR(50),
     review_count INT,
     useful INT,
-    user_id VARCHAR(25) NOT NULL,
+    user_id VARCHAR(50) NOT NULL,
     yelping_since VARCHAR(10),
     PRIMARY KEY(user_id)
 );
@@ -83,7 +83,7 @@ CREATE TABLE review (
     business_id VARCHAR(25) NOT NULL,
     stars INT,
     date VARCHAR(10),
-    text VARCHAR(100),
+    text VARCHAR(400),
     useful_vote INT,
     funny_vote INT,
     cool_vote INT,
