@@ -255,29 +255,20 @@ def insertCheckins():
             data = json.loads(line)
 
             business_id = str(cleanStr4SQL(data['business_id']))
+           # for day in data['time']:
+            #    for k,v in data['time'][day].items():
+            #        sql_str = "INSERT INTO checkins (business_id, day, time, count) " \
+            #            +"VALUES ('" + str(cleanStr4SQL(data['business_id'])) + "','" + str(day) + "','" + str(k) + "','" + str(v) + "');"
             for day in data['time']:
-                morning = 0
-                afternoon = 0
-                evening = 0
-                night = 0
-                
-                for hour in data['time'][day]:
-                    if hour in ['6:00', '7:00', '8:00', '9:00', '10:00', '11:00']:
-                        morning += data['time'][day][hour]
-                    elif hour in ['12:00', '13:00', '14:00', '15:00', '16:00']:
-                        afternoon += data['time'][day][hour]
-                    elif hour in ['17:00', '18:00', '19:00', '20:00', '21:00', '22:00']:
-                        evening += data['time'][day][hour]
-                    elif hour in ['23:00', '0:00', '1:00', '2:00', '3:00', '4:00', '5:00']:
-                        night += data['time'][day][hour]
-                
-                sql_str = "INSERT INTO checkins (business_id, day, time) " \
-                    +"VALUES ('" + str(cleanStr4SQL(data['business_id'])) + "','" + str(day) + "','" + str(hour) + "');"
-                try:
-                    cur.execute(sql_str)
-                except psycopg2.Error as e: 
-                    print("Insert to user table failed...")
-                    print("Error: ", e)
+                for hour in data['time'][day].keys():
+                    sql_str = "INSERT INTO checkins (business_id, day, time, count) " \
+                    + "VALUES ('" + str(business_id) + "','" + str(day) + "','" + str(hour) + "','" + str(data['time'][day][hour]) + "');"
+
+                    try:
+                        cur.execute(sql_str)
+                    except psycopg2.Error as e: 
+                        print("Insert to user table failed...")
+                        print("Error: ", e)
             conn.commit()
             # optionally you might write the INSERT statement to a file.
             # outfile.write(sql_str)
@@ -291,6 +282,8 @@ def insertCheckins():
     print(count_line)
     #outfile.close()  #uncomment this line if you are writing the INSERT statements to an output file.
     f.close()
+
+
 
 
 #
